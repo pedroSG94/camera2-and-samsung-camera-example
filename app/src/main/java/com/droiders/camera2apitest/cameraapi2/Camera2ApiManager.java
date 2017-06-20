@@ -53,7 +53,7 @@ public class Camera2ApiManager extends CameraDevice.StateCallback
     this.fps = fps;
   }
 
-  public void setImageFormat(int imageFormat){
+  public void setImageFormat(int imageFormat) {
     this.imageFormat = imageFormat;
   }
 

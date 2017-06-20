@@ -80,7 +80,7 @@ public class SamsungApiManager {
   private List<Integer> mLensFacingList;
   private Activity context;
 
-  public SamsungApiManager(Activity context, TextureView textureView, int camerId) {
+  public SamsungApiManager(Activity context, TextureView textureView, int cameraId) {
     this.context = context;
     this.mTextureView = textureView;
     startBackgroundThread();
@@ -94,7 +94,7 @@ public class SamsungApiManager {
       return;
     }
     createUI();
-    checkRequiredFeatures(camerId);
+    checkRequiredFeatures(cameraId);
     openCamera(mLensFacing);
   }
 
@@ -103,7 +103,8 @@ public class SamsungApiManager {
       // Find available lens facing value for this device
       Set<Integer> lensFacings = new HashSet<>();
       for (String id : mSCamera.getSCameraManager().getCameraIdList()) {
-        SCameraCharacteristics cameraCharacteristics = mSCamera.getSCameraManager().getCameraCharacteristics(id);
+        SCameraCharacteristics cameraCharacteristics =
+            mSCamera.getSCameraManager().getCameraCharacteristics(id);
         lensFacings.add(cameraCharacteristics.get(SCameraCharacteristics.LENS_FACING));
       }
       mLensFacingList = new ArrayList<>(lensFacings);
@@ -111,7 +112,6 @@ public class SamsungApiManager {
       mLensFacing = mLensFacingList.get(cameraId);
 
       setDefaultJpegSize(mSCamera.getSCameraManager(), mLensFacing);
-
     } catch (CameraAccessException e) {
       e.printStackTrace();
       Log.e("Camera", "Cannot access the camera.", e);
@@ -177,11 +177,16 @@ public class SamsungApiManager {
         if (cameraCharacteristics.get(SCameraCharacteristics.LENS_FACING) == facing) {
           List<Size> jpegSizeList = new ArrayList<>();
 
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && cameraCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getHighResolutionOutputSizes(
-              ImageFormat.JPEG) != null) {
-            jpegSizeList.addAll(Arrays.asList(cameraCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getHighResolutionOutputSizes(ImageFormat.JPEG)));
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+              && cameraCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+              .getHighResolutionOutputSizes(ImageFormat.JPEG) != null) {
+            jpegSizeList.addAll(Arrays.asList(
+                cameraCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                    .getHighResolutionOutputSizes(ImageFormat.JPEG)));
           }
-          jpegSizeList.addAll(Arrays.asList(cameraCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG)));
+          jpegSizeList.addAll(Arrays.asList(
+              cameraCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                  .getOutputSizes(ImageFormat.JPEG)));
           mPictureSize = jpegSizeList.get(0);
         }
       }
@@ -190,11 +195,10 @@ public class SamsungApiManager {
     }
   }
 
-
   /**
    * Opens a {@link com.samsung.android.sdk.camera.SCameraDevice}.
    */
-  synchronized private void openCamera(int facing) {
+  synchronized public void openCamera(int facing) {
     try {
       if (!mCameraOpenCloseLock.tryAcquire(3000, TimeUnit.MILLISECONDS)) {
         Log.e("Error", "time out");
@@ -206,7 +210,8 @@ public class SamsungApiManager {
 
       // Find camera device that facing to given facing parameter.
       for (String id : mSCamera.getSCameraManager().getCameraIdList()) {
-        SCameraCharacteristics cameraCharacteristics = mSCamera.getSCameraManager().getCameraCharacteristics(id);
+        SCameraCharacteristics cameraCharacteristics =
+            mSCamera.getSCameraManager().getCameraCharacteristics(id);
         if (cameraCharacteristics.get(SCameraCharacteristics.LENS_FACING) == facing) {
           mCameraId = id;
           break;
@@ -221,20 +226,29 @@ public class SamsungApiManager {
       // acquires camera characteristics
       mCharacteristics = mSCamera.getSCameraManager().getCameraCharacteristics(mCameraId);
 
-      StreamConfigurationMap streamConfigurationMap = mCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+      StreamConfigurationMap streamConfigurationMap =
+          mCharacteristics.get(SCameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
       // Acquires supported preview size list that supports SurfaceTexture
-      mPreviewSize = getOptimalPreviewSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), (double) mPictureSize.getWidth() / mPictureSize.getHeight());
+      mPreviewSize =
+          getOptimalPreviewSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class),
+              (double) mPictureSize.getWidth() / mPictureSize.getHeight());
 
-      Log.d("Camera", "Picture Size: " + mPictureSize.toString() + " Preview Size: " + mPreviewSize.toString());
+      Log.d("Camera",
+          "Picture Size: " + mPictureSize.toString() + " Preview Size: " + mPreviewSize.toString());
 
-      if (contains(mCharacteristics.get(SCameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES), SCameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
+      if (contains(mCharacteristics.get(SCameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES),
+          SCameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW)) {
         List<Size> rawSizeList = new ArrayList<>();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && streamConfigurationMap.getHighResolutionOutputSizes(ImageFormat.RAW_SENSOR) != null) {
-          rawSizeList.addAll(Arrays.asList(streamConfigurationMap.getHighResolutionOutputSizes(ImageFormat.RAW_SENSOR)));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+            && streamConfigurationMap.getHighResolutionOutputSizes(ImageFormat.RAW_SENSOR)
+            != null) {
+          rawSizeList.addAll(Arrays.asList(
+              streamConfigurationMap.getHighResolutionOutputSizes(ImageFormat.RAW_SENSOR)));
         }
-        rawSizeList.addAll(Arrays.asList(streamConfigurationMap.getOutputSizes(ImageFormat.RAW_SENSOR)));
+        rawSizeList.addAll(
+            Arrays.asList(streamConfigurationMap.getOutputSizes(ImageFormat.RAW_SENSOR)));
       }
 
       // Opening the camera device here
@@ -242,13 +256,11 @@ public class SamsungApiManager {
         @Override
         public void onDisconnected(SCameraDevice sCameraDevice) {
           mCameraOpenCloseLock.release();
-
         }
 
         @Override
         public void onError(SCameraDevice sCameraDevice, int i) {
           mCameraOpenCloseLock.release();
-
         }
 
         public void onOpened(SCameraDevice sCameraDevice) {
@@ -307,8 +319,7 @@ public class SamsungApiManager {
     if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
       bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
       matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
-      float scale = Math.max(
-          (float) viewHeight / mPreviewSize.getHeight(),
+      float scale = Math.max((float) viewHeight / mPreviewSize.getHeight(),
           (float) viewWidth / mPreviewSize.getWidth());
       matrix.postScale(scale, scale, centerX, centerY);
       matrix.postRotate(90 * (rotation - 2), centerX, centerY);
@@ -317,7 +328,8 @@ public class SamsungApiManager {
     }
 
     mTextureView.setTransform(matrix);
-    mTextureView.getSurfaceTexture().setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+    mTextureView.getSurfaceTexture()
+        .setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
   }
 
   private boolean contains(final int[] array, final int key) {
@@ -338,8 +350,9 @@ public class SamsungApiManager {
         || null == mSCameraDevice
         || null == mSCameraManager
         || null == mPreviewSize
-        || !mTextureView.isAvailable())
+        || !mTextureView.isAvailable()) {
       return;
+    }
 
     try {
       SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -415,7 +428,8 @@ public class SamsungApiManager {
   private int getJpegOrientation() {
     int degrees = mLastOrientation;
 
-    if (mCharacteristics.get(SCameraCharacteristics.LENS_FACING) == SCameraCharacteristics.LENS_FACING_FRONT) {
+    if (mCharacteristics.get(SCameraCharacteristics.LENS_FACING)
+        == SCameraCharacteristics.LENS_FACING_FRONT) {
       degrees = -degrees;
     }
 
@@ -439,8 +453,7 @@ public class SamsungApiManager {
     // Try to find an size match aspect ratio and size
     for (Size size : sizes) {
       double ratio = (double) size.getWidth() / size.getHeight();
-      if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
-        continue;
+      if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
       if (Math.abs(size.getHeight() - targetHeight) < minDiff) {
         optimalSize = size;
         minDiff = Math.abs(size.getHeight() - targetHeight);

@@ -8,15 +8,16 @@
     tools:context="com.droiders.camera2apitest.MainActivity"
     >
 
-  <TextureView
-      android:id="@+id/texture"
-      android:layout_width="match_parent"
-      android:layout_height="200dp"
-      android:layout_alignParentTop="true"/>
   <SurfaceView
-      android:id="@+id/texture_2"
+      android:id="@+id/surfaceView"
       android:layout_width="match_parent"
-      android:layout_height="200dp"
-      android:layout_alignParentBottom="true"
+      android:layout_height="match_parent"
+      android:visibility="gone"
+      />
+  <TextureView
+      android:id="@+id/textureView"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone"
       />
 </RelativeLayout>
