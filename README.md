@@ -3,4 +3,4 @@ Easy example, how to use camera2 and samsung camera api
 
 # Note
 
-Remenber need take permission runtime (no added)
+Remember need take permissions runtime (no added)
