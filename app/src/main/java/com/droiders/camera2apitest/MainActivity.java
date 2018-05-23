@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    surface = (SurfaceView) findViewById(R.id.surfaceView);
-    tetureView = (TextureView) findViewById(R.id.textureView);
+    surface = findViewById(R.id.surfaceView);
+    tetureView = findViewById(R.id.textureView);
 
     if (!hasPermissions(this, PERMISSIONS)) {
       ActivityCompat.requestPermissions(this, PERMISSIONS, 1);
